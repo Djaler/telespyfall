@@ -3,6 +3,7 @@ package com.github.djaler.telespyfall.handlers.buttons
 import com.github.djaler.telespyfall.components.GameBoardFactory
 import com.github.djaler.telespyfall.handlers.CallbackQueryHandler
 import com.github.djaler.telespyfall.service.GameService
+import com.github.djaler.telespyfall.utils.userId
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.text.editMessageText
@@ -17,6 +18,11 @@ class StartGameCallbackHandler(
 ) : CallbackQueryHandler() {
     override suspend fun handleCallback(query: MessageDataCallbackQuery, data: String) {
         val originalGame = gameService.getGame(query.message.messageId)
+
+        if (originalGame.players.find { it.telegramId == query.user.id.userId } == null) {
+            requestsExecutor.answerCallbackQuery(query, "Ты не играешь")
+            return
+        }
 
         val game = gameService.startGame(originalGame)
 
