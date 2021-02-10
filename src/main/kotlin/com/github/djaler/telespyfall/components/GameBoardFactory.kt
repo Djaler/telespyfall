@@ -41,6 +41,8 @@ class GameBoardFactory {
 
     @OptIn(ExperimentalStdlibApi::class)
     fun createGameBoard(game: GameEntity): GameBoard {
+        val enoughPlayers = game.players.size > 2
+
         val buttons = buildList<InlineKeyboardButton> {
             when (game.state) {
                 GameState.CREATED -> {
@@ -49,7 +51,7 @@ class GameBoardFactory {
                     if (game.players.isNotEmpty()) {
                         add(leaveGameButton)
                     }
-                    if (game.players.size > 2) {
+                    if (enoughPlayers) {
                         add(startGameButton)
                     }
                 }
@@ -68,6 +70,7 @@ class GameBoardFactory {
                 listOfNotNull(
                     "Набираем игроков",
                     if (game.players.isNotEmpty()) "Готовы играть: ${game.players.joinToString { it.username }}" else null,
+                    if (!enoughPlayers) "Недостаточно игроков" else null
                 ).joinToString(". ")
             }
             GameState.STARTED -> "Играют: ${game.players.joinToString { it.username }}"
