@@ -76,6 +76,10 @@ class GameService(
 
         val players = game.players
 
+        if (players.size <= 2) {
+            throw IllegalStateException("${players.size} players not enough to start")
+        }
+
         val spyIndex = players.indices.random()
 
         gameRepository.save(game.copy(state = GameState.STARTED))

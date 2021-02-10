@@ -49,7 +49,7 @@ class GameBoardFactory {
                     if (game.players.isNotEmpty()) {
                         add(leaveGameButton)
                     }
-                    if (game.players.size > 1) {
+                    if (game.players.size > 2) {
                         add(startGameButton)
                     }
                 }
