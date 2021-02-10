@@ -65,11 +65,10 @@ class GameBoardFactory {
 
         val text = when (game.state) {
             GameState.CREATED -> {
-                if (game.players.isEmpty()) {
-                    "Набираем игроков"
-                } else {
-                    "Набираем игроков. Готовы играть: ${game.players.joinToString { it.username }}"
-                }
+                listOfNotNull(
+                    "Набираем игроков",
+                    if (game.players.isNotEmpty()) "Готовы играть: ${game.players.joinToString { it.username }}" else null,
+                ).joinToString(". ")
             }
             GameState.STARTED -> "Играют: ${game.players.joinToString { it.username }}"
             GameState.FINISHED -> "Игру завершили: ${game.players.joinToString { it.username }}"
