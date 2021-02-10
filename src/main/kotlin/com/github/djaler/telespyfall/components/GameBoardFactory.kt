@@ -20,6 +20,14 @@ class GameBoardFactory {
         "Выйти",
         createCallbackDataForHandler(LeaveGameCallbackHandler::class.java)
     )
+    private val addSpyButton = CallbackDataInlineKeyboardButton(
+        "+1 шпион",
+        createCallbackDataForHandler(AddSpyCallbackHandler::class.java)
+    )
+    private val removeSpyButton = CallbackDataInlineKeyboardButton(
+        "-1 шпион",
+        createCallbackDataForHandler(RemoveSpyCallbackHandler::class.java)
+    )
     private val startGameButton = CallbackDataInlineKeyboardButton(
         "Начать",
         createCallbackDataForHandler(StartGameCallbackHandler::class.java)
@@ -41,7 +49,7 @@ class GameBoardFactory {
 
     @OptIn(ExperimentalStdlibApi::class)
     fun createGameBoard(game: GameEntity): GameBoard {
-        val enoughPlayers = game.players.size > 2
+        val enoughPlayers = game.players.size > game.spyCount + 1
 
         val buttons = buildList<InlineKeyboardButton> {
             when (game.state) {
@@ -50,6 +58,12 @@ class GameBoardFactory {
 
                     if (game.players.isNotEmpty()) {
                         add(leaveGameButton)
+                    }
+                    if (game.players.size > game.spyCount + 2) {
+                        add(addSpyButton)
+                    }
+                    if (game.spyCount > 1) {
+                        add(removeSpyButton)
                     }
                     if (enoughPlayers) {
                         add(startGameButton)
@@ -70,6 +84,7 @@ class GameBoardFactory {
                 listOfNotNull(
                     "Набираем игроков",
                     if (game.players.isNotEmpty()) "Готовы играть: ${game.players.joinToString { it.username }}" else null,
+                    "Количество шпионов: ${game.spyCount}",
                     if (!enoughPlayers) "Недостаточно игроков" else null
                 ).joinToString(". ")
             }

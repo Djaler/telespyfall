@@ -69,6 +69,41 @@ class GameService(
     }
 
     @Transactional
+    fun addSpy(game: GameEntity): GameEntity {
+        if (game.state !== GameState.CREATED) {
+            throw IllegalStateException("Game ${game.id} already ${game.state}, can't add spy")
+        }
+
+        val newSpyCount = game.spyCount + 1
+
+        if (game.players.size <= newSpyCount + 1) {
+            throw IllegalStateException("Only ${game.players.size} players, can't have $newSpyCount spies")
+        }
+
+        return gameRepository.save(
+            game.copy(spyCount = newSpyCount)
+        )
+    }
+
+    @Transactional
+    fun removeSpy(game: GameEntity): GameEntity {
+        if (game.state !== GameState.CREATED) {
+            throw IllegalStateException("Game ${game.id} already ${game.state}, can't add spy")
+        }
+
+        val newSpyCount = game.spyCount - 1
+
+        if (newSpyCount == 0) {
+            throw IllegalStateException("Can't have no spy")
+        }
+
+        return gameRepository.save(
+            game.copy(spyCount = newSpyCount)
+        )
+    }
+
+    @Transactional
+    @OptIn(ExperimentalStdlibApi::class)
     fun startGame(game: GameEntity): GameEntity {
         if (game.state !== GameState.CREATED) {
             throw IllegalStateException("Game ${game.id} already ${game.state}, can't start")
@@ -76,16 +111,20 @@ class GameService(
 
         val players = game.players
 
-        if (players.size <= 2) {
+        if (players.size <= game.spyCount + 1) {
             throw IllegalStateException("${players.size} players not enough to start")
         }
 
-        val spyIndex = players.indices.random()
+        val spiesIndices = buildSet {
+            repeat(game.spyCount) {
+                add(players.indices.subtract(this).random())
+            }
+        }
 
         gameRepository.save(game.copy(state = GameState.STARTED))
         gamePlayerRepository.saveAll(
             players.mapIndexed { index, player ->
-                player.copy(spy = index == spyIndex)
+                player.copy(spy = spiesIndices.contains(index))
             }
         )
 

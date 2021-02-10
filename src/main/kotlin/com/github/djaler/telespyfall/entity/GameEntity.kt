@@ -20,6 +20,9 @@ data class GameEntity(
     @JoinColumn(name = "gameId")
     val players: List<GamePlayerEntity> = listOf(),
 
+    @Column
+    val spyCount: Int = 1,
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0
